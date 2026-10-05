@@ -51,7 +51,9 @@ function (@main)(args)
     elseif options.action == :version
         println("MapperStudio 0.1.0")
     else
-        Base.exit_on_sigint(false)
+        # With -m, Julia runs main in a separate task. Let SIGINT exit normally;
+        # serve registers cleanup instead of throwing into the scheduler task.
+        Base.exit_on_sigint(true)
         serve(; port=options.port)
     end
     return 0

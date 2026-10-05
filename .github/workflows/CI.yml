@@ -36,8 +36,9 @@ jobs:
           using Pkg
           Pkg.Apps.add(path=pwd())
           shim = joinpath(first(DEPOT_PATH), "bin", Sys.iswindows() ? "mapperstudio.bat" : "mapperstudio")
-          run(`$shim --help`)
-          run(`$shim --version`)
+          command = Sys.iswindows() ? `cmd /c $shim` : `$shim`
+          run(`$command --help`)
+          run(`$command --version`)
       - uses: actions/setup-node@v4
         with:
           node-version: '22'

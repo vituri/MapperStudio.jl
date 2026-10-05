@@ -145,6 +145,12 @@ end
 function serve(;port=8090)
     println("\nMapperStudio · http://localhost:$port\nCtrl+C para encerrar. Dados permanecem nesta máquina.\n")
     server=HTTP.serve!(handler,"127.0.0.1",port;verbose=false)
+    atexit() do
+        if isopen(server)
+            close(server)
+            println("\nStudio encerrado.")
+        end
+    end
     try
         wait(server)
     catch err
