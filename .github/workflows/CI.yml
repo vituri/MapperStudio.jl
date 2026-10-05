@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Julia 1.12 / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: julia-actions/setup-julia@v2
+        with:
+          version: '1.12'
+      - uses: julia-actions/cache@v2
+      - name: Resolve published dependencies and test
+        shell: julia --color=yes --project=. {0}
+        run: |
+          using Pkg
+          Pkg.instantiate()
+          Pkg.test()
+      - name: Install the app from its Git repository
+        shell: julia --color=yes {0}
+        run: |
+          using Pkg
+          Pkg.Apps.add(path=pwd())
+          shim = joinpath(first(DEPOT_PATH), "bin", Sys.iswindows() ? "mapperstudio.bat" : "mapperstudio")
+          run(`$shim --help`)
+          run(`$shim --version`)
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check web/app.js

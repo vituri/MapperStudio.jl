@@ -1,0 +1,6 @@
+Manifest.toml
+Manifest-v*.toml
+*.cov
+*.mem
+__pycache__/
+.DS_Store
