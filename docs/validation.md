@@ -1,6 +1,30 @@
-# Validation of JuliaTDA Studio 0.1.0
+# Validation of MapperStudio 0.1.0
 
-Executed on 3 October 2026, Linux x86-64. Scientific/API tests passed under
+## Standalone distribution — 4 October 2026
+
+Under Julia 1.12.5 on Linux x86-64, the extracted app passed **262 assertions**
+with `Pkg.test()`: the 250 scientific/API checks below plus 12 CLI checks.
+Dependencies resolved from public Git revisions. The bundled multiparameter
+scientific source was checked byte-for-byte against the workspace version,
+and the included diabetes CSV matched its recorded SHA256.
+
+`Pkg.Apps.add(path=...)` installed the committed Git repository into a separate
+depot containing only the General registry, using cached public dependencies.
+From an unrelated working directory, the installed launcher passed help,
+version and invalid-port checks; served health, interface assets and research;
+loaded the bundled 145-row dataset; and calculated a circle Mapper through REST
+with full coverage. SIGINT closed the server through its exit hook without an
+unhandled scheduler exception. `node --check web/app.js` also passed.
+
+The repository's CI additionally exercises package tests and app launcher
+installation on Linux, macOS and Windows. Platform-specific results should be
+read from the [CI runs](https://github.com/vituri/MapperStudio.jl/actions/workflows/CI.yml).
+The browser evidence below belongs to the original integrated app; the
+standalone extraction changes packaging, branding, CLI and resource locations.
+
+## Original integrated app — 3 October 2026
+
+Executed on Linux x86-64. Scientific/API tests passed under
 **Julia 1.12.5 and Julia 1.10.10**. Browser checks used Playwright with
 HeadlessChrome 154, with the real Julia server running on port 8090.
 These checks establish the tested behavior below; they do not establish
