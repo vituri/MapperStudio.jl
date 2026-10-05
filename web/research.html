@@ -1,205 +1,203 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Pesquisa Ayasdi · MapperStudio</title><link rel="stylesheet" href="/style.css"></head><body><main class="research-content" style="max-width:950px;margin:40px auto;padding:24px"><a href="/">Voltar ao Studio</a><h1>O Mapper da Ayasdi: investigação e correspondências</h1>
-<p>Consultado em <strong>3 de outubro de 2026</strong>. Esta é uma reconstrução de funcionalidades
-a partir de fontes públicas históricas, não uma especificação completa do produto
-proprietário. Datas de indexação dos buscadores não são datas de publicação. Parte
-dos blogs antigos está indisponível no endereço original; alguns textos migraram
-para a SymphonyAI. Não foi encontrado um manual completo e acessível do SDK que
-permitisse reconstruir todos os nomes de métodos, limites ou comportamentos.</p>
-<h2>1. O produto era uma plataforma, não apenas um algoritmo</h2>
-<p>O whitepaper de 2017 descreve uma camada de tecnologia servida por REST, três
-formas de acesso e uma infraestrutura orientada a Hadoop. <strong>Workbench</strong> era a
-aplicação visual para construir e explorar modelos; <strong>Python SDK</strong> dava acesso
-programático a uma superfície mais ampla; <strong>Envision</strong> fornecia componentes e
-fluxos para aplicações de negócio. A empresa também combinava descoberta,
-predição, justificação, ação e aprendizado. Portanto, clonar apenas um desenho
-de grafo não reconstruiria o fluxo do produto.
-Fonte primária: <a href="https://s3.amazonaws.com/cdn.ayasdi.com/wp-content/uploads/2018/04/04142230/UnderstandingAyasdi_WP_061617v011.pdf">Understanding Ayasdi, pp. 6–8</a>.</p>
-<h2>2. Construção do modelo topológico</h2>
-<p>O fluxo selecionava variáveis e uma medida de dissimilaridade, calculava lentes,
-cobria seu espaço com intervalos sobrepostos, fazia clustering em cada
-pré-imagem e conectava clusters com observações compartilhadas. O grafo resumido
-permitia ver ramos, componentes e laços, sem exigir uma única partição global.
-A lente determina a cobertura; a métrica determina semelhança dentro dela;
-o layout determina a posição desenhada. São decisões diferentes.</p>
-<p>Os controles publicamente documentados incluem <strong>resolution</strong>, número de
-intervalos; <strong>gain</strong>, com sobreposição relativa <code>1 − 1/gain</code>; e <strong>equalize</strong>,
-que procura equilibrar o número de observações nas pré-imagens. Ganho 2
-corresponde a 50%; ganho 3, aproximadamente 66,7%. PCA e MDS apareciam como
-lentes; as chamadas Neighborhood lenses usavam um grafo k-NN e embedding
-proprietário. O artigo recomenda usar o par Neighborhood em conjunto e evitar
-equalização nesse caso. Há métricas euclidiana, correlação e versões normalizadas.
-Fonte primária: <a href="https://doi.org/10.1186/s13321-018-0308-5">Pirashvili et al., Journal of Cheminformatics (2018), Implementation of mapper</a>.</p>
-<p>Não se deve identificar Neighborhood com qualquer implementação genérica de
-t-SNE: o texto descreve uma construção proprietária. Tampouco a palavra
-"normalizada" basta para fixar uma fórmula entre versões. No Studio, padronização
-por desvio padrão é uma escolha explícita e auditada; não se afirma identidade
-numérica com todas as variantes históricas VNE.</p>
-<h2>3. Exploração visual e Explain</h2>
-<p>Colorir nós por uma variável, destacar regiões e examinar o que as distingue
-constitui o fluxo central ilustrado no artigo indicado pelo usuário. O artigo
-reúne aplicações a regimes financeiros, recusas de contas, fraude, exploração
-de petróleo, conversas em redes sociais e biomarcadores. Seu relato inclui
-redes construídas de milhões de registros, mas não oferece um benchmark
-reproduzível dos custos computacionais. A coloração é uma variável de
-investigação: pode ser desfecho, data, pagamento, palavra ou erro de um modelo,
-enquanto a geometria é construída com outras características.
-Fonte de descoberta: <a href="https://www.justinmath.com/mapper-use-cases-at-ayasdi/">Skycak, Mapper Use-Cases at Ayasdi (2017)</a>.</p>
-<p>Na explicação publicada por Gunnar Carlsson, dois grupos dão origem a duas
-distribuições para cada variável. <strong>Explain</strong> ordena as variáveis pela
-estatística Kolmogorov–Smirnov e apresenta valores p. O texto também descreve
-uma extensão: transpor a matriz para fazer Mapper das <strong>variáveis</strong>, e colorir
-esse mapa com os valores médios de um grupo de observações. Esse segundo mapa
-ajuda a organizar uma lista longa de características correlacionadas.
-Fonte primária: <a href="https://www.symphonyai.com/resources/machine-intelligence-statistical-inference-human-interpretation-data">Carlsson, Machine Intelligence for Statistical Inference and Human Interpretation of Data (2018)</a>.</p>
-<p>O Studio oferece KS para variáveis numéricas, distância de variação total para
-categorias, valores p por permutação com semente, diferenças de médias, efeito
-padronizado e q de Benjamini–Hochberg. Isso é uma <strong>adaptação</strong>, não uma alegação
-de equivalência dos testes de todas as versões da Ayasdi. Seleções e referências
-são conjuntos de linhas, deduplicados; uma referência explícita exclui a
-interseção. Grupos escolhidos depois de olhar estes mesmos dados produzem viés
-de seleção que BH não remove. A análise é identificada como exploratória.</p>
-<h2>4. Grupos automáticos, hotspots e modelos preditivos</h2>
-<p>Um estudo de falhas de predição descreve subgrupos escolhidos manualmente ou
-por detecção de comunidades; a implementação Ayasdi combina clustering
-hierárquico aglomerativo com modularidade Louvain. Usa ainda o erro de predição
-como lente para reunir modos de falha. Essa capacidade é mais rica do que
-apenas separar componentes conectadas.
-Fonte primária: <a href="https://www.mdpi.com/1999-4893/13/6/150">Fibers of Failure: Classifying Errors in Predictive Processes (2020)</a>.</p>
-<p>O whitepaper AML descreve segmentação de clientes/transações, descoberta de
-anomalias, identificação de hotspots, ranking de alertas e atualizações diante
-de novos dados. A justificação inclui árvores de decisão e documentação para
-avaliação dos modelos. Esses são fluxos de uma aplicação especializada,
-construída sobre a plataforma; não há evidência de que todo botão estivesse
-disponível no Workbench genérico.
-Fonte primária: <a href="https://s3.amazonaws.com/cdn.ayasdi.com/wp-content/uploads/2018/04/22170635/AML_Solutions_Deep_Dive_WP_051617v01.pdf">Anti-Money Laundering Solution Deep Dive (2017/2018), Intelligent Segmentation/Alerts/Typologies</a>.</p>
-<p>O Studio implementa grupos por componentes, hotspots definidos pelo quartil
-superior da cor numérica e ToMATo na nuvem de dados. Os hotspots são
-descritivos. Nenhum desses métodos é apresentado como cópia do autogrouping
-AHCL/Louvain ou do ranking empresarial de alertas.</p>
-<h2>5. Automação, tipos de dados e escala</h2>
-<p>O whitepaper da SymphonyAI anuncia construção automática de modelos com
-busca sobre métricas e filtros, dados numéricos e texto esparso, milhões de
-linhas, muitas colunas, integração por SDK/API, alta disponibilidade,
-gerenciamento de usuários, colaboração e múltiplos clientes. Também descreve
-descoberta de características, recomendações e modelos locais ou ensembles
-em segmentos. São afirmações do fabricante, não medições independentes que
-permitam atribuir esses mesmos resultados ao Studio.
-Fonte primária: <a href="https://www.symphonyai.com/wp-content/uploads/2020/07/SAI-Topological-Data-Analysis-and-Machine-Learning-Better-Together-vf.pdf">Topological Data Analysis and Machine Learning: Better Together (2020), pp. 13–15</a>.</p>
-<p>A varredura do Studio compara configurações de cobertura mantendo lentes,
-métrica e pré-processamento fixos. Ela não aprende qual modelo é ótimo. A
-versão local mantém até oito tabelas e dezesseis resultados recentes em
-memória; exportar workspace é o mecanismo persistente de recuperação.</p>
-<h2>6. Mapa de funcionalidades desta implementação</h2>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Ayasdi research · MapperStudio</title><link rel="stylesheet" href="/style.css"></head><body><main class="research-content" style="max-width:950px;margin:40px auto;padding:24px"><a href="/">Back to Studio</a><h1>Ayasdi Mapper: research and correspondences</h1>
+<p>Reviewed on <strong>3 October 2026</strong>. This is a reconstruction of functionality from
+historical public sources, rather than a complete specification of the
+proprietary product. Search-engine indexing dates are not publication dates.
+Some older blogs are unavailable at their original addresses; some articles
+moved to SymphonyAI. No complete, accessible SDK manual was found that would
+allow every method name, limit or behavior to be reconstructed.</p>
+<h2>1. The product was a platform</h2>
+<p>The 2017 whitepaper describes a technology layer served through REST, three
+access paths and Hadoop-oriented infrastructure. <strong>Workbench</strong> was the visual
+application for building and exploring models; the <strong>Python SDK</strong> provided
+programmatic access to a broader surface; <strong>Envision</strong> supplied components and
+workflows for business applications. The company also combined discovery,
+prediction, justification, action and learning. Reproducing a graph drawing
+alone would therefore leave much of the product workflow unimplemented.
+Primary source: <a href="https://s3.amazonaws.com/cdn.ayasdi.com/wp-content/uploads/2018/04/04142230/UnderstandingAyasdi_WP_061617v011.pdf">Understanding Ayasdi, pp. 6–8</a>.</p>
+<h2>2. Building the topological model</h2>
+<p>The workflow selected variables and a dissimilarity measure, computed lenses,
+covered lens space with overlapping intervals, clustered each preimage and
+connected clusters with shared observations. The resulting graph summarized
+branches, components and loops without requiring a single global partition.
+The lens determines the cover; the metric determines similarity within it;
+the layout determines the drawn position. These are separate decisions.</p>
+<p>Publicly documented controls include <strong>resolution</strong>, the number of intervals;
+<strong>gain</strong>, with relative overlap <code>1 − 1/gain</code>; and <strong>equalize</strong>, which attempts to
+balance the number of observations in preimages. Gain 2 corresponds to 50%
+overlap; gain 3 to approximately 66.7%. PCA and MDS appeared as lenses; the
+Neighborhood lenses used a k-NN graph and a proprietary embedding. The paper
+recommends using the Neighborhood pair together and avoiding equalization in
+that case. Metrics include Euclidean, correlation and normalized variants.
+Primary source: <a href="https://doi.org/10.1186/s13321-018-0308-5">Pirashvili et al., Journal of Cheminformatics (2018), Implementation of mapper</a>.</p>
+<p>Neighborhood should not be identified with an arbitrary generic t-SNE
+implementation: the paper describes a proprietary construction. Likewise,
+“normalized” does not specify a unique formula across versions. In the Studio,
+standard-deviation scaling is an explicit, audited choice; numerical identity
+with all historical VNE variants is not claimed.</p>
+<h2>3. Visual exploration and Explain</h2>
+<p>Coloring nodes by a variable, highlighting regions and examining what
+distinguishes them forms the central workflow illustrated in the linked
+article. It collects applications involving financial regimes, claim denials,
+fraud, oil exploration, social-media conversations and biomarkers. It describes
+networks built from millions of records, without providing a reproducible
+benchmark of computational costs. Color is an investigative variable: it might
+represent an outcome, date, payment, word or model error while geometry is
+constructed from other features.
+Discovery source: <a href="https://www.justinmath.com/mapper-use-cases-at-ayasdi/">Skycak, Mapper Use-Cases at Ayasdi (2017)</a>.</p>
+<p>In Gunnar Carlsson's published explanation, two groups produce two
+distributions for each variable. <strong>Explain</strong> ranks variables by the
+Kolmogorov–Smirnov statistic and presents p-values. The article also describes
+an extension: transpose the matrix to build Mapper on <strong>variables</strong>, then color
+that map with the mean values of a group of observations. This second map helps
+organize a long list of correlated features.
+Primary source: <a href="https://www.symphonyai.com/resources/machine-intelligence-statistical-inference-human-interpretation-data">Carlsson, Machine Intelligence for Statistical Inference and Human Interpretation of Data (2018)</a>.</p>
+<p>The Studio provides KS for numeric variables, total-variation distance for
+categories, seeded permutation p-values, mean differences, standardized effect
+sizes and Benjamini–Hochberg q-values. This is an <strong>adaptation</strong>, without a claim
+of equivalence to the tests in every Ayasdi version. Selections and references
+are deduplicated sets of rows; an explicit reference excludes the intersection.
+Groups chosen after examining the same data introduce selection bias that BH
+does not remove. The analysis is labeled exploratory.</p>
+<h2>4. Automatic groups, hotspots and predictive models</h2>
+<p>A study of prediction failures describes subgroups selected manually or through
+community detection; the Ayasdi implementation combines agglomerative
+hierarchical clustering with Louvain modularity. It also uses prediction error
+as a lens to collect failure modes. This capability is richer than separating
+connected components alone.
+Primary source: <a href="https://www.mdpi.com/1999-4893/13/6/150">Fibers of Failure: Classifying Errors in Predictive Processes (2020)</a>.</p>
+<p>The AML whitepaper describes customer/transaction segmentation, anomaly
+discovery, hotspot identification, alert ranking and updates as new data arrive.
+Justification includes decision trees and documentation for model evaluation.
+These are workflows in a specialized application built on the platform; there
+is no evidence that every button was available in the generic Workbench.
+Primary source: <a href="https://s3.amazonaws.com/cdn.ayasdi.com/wp-content/uploads/2018/04/22170635/AML_Solutions_Deep_Dive_WP_051617v01.pdf">Anti-Money Laundering Solution Deep Dive (2017/2018), Intelligent Segmentation/Alerts/Typologies</a>.</p>
+<p>The Studio implements groups based on connected components, hotspots defined
+by the upper quartile of the numeric color, and ToMATo on the point cloud.
+Hotspots are descriptive. None of these methods is presented as a copy of
+AHCL/Louvain autogrouping or enterprise alert ranking.</p>
+<h2>5. Automation, data types and scale</h2>
+<p>The SymphonyAI whitepaper advertises automatic model construction with search
+over metrics and filters, numeric and sparse text data, millions of rows, many
+columns, SDK/API integration, high availability, user management, collaboration
+and multiple clients. It also describes feature discovery, recommendations and
+local models or ensembles in segments. These are vendor claims, rather than
+independent measurements that establish the same results for the Studio.
+Primary source: <a href="https://www.symphonyai.com/wp-content/uploads/2020/07/SAI-Topological-Data-Analysis-and-Machine-Learning-Better-Together-vf.pdf">Topological Data Analysis and Machine Learning: Better Together (2020), pp. 13–15</a>.</p>
+<p>The Studio's sweep compares cover configurations while keeping lenses, metric
+and preprocessing fixed. It does not learn which model is optimal. The local
+version keeps up to eight tables and sixteen recent results in memory;
+workspace export provides persistent recovery.</p>
+<h2>6. Feature matrix for this implementation</h2>
 <table>
 <thead>
 <tr>
-<th>Área</th>
-<th>Implementado no Studio</th>
-<th>Diferença ou limite</th>
+<th>Area</th>
+<th>Implemented in the Studio</th>
+<th>Difference or limit</th>
 </tr>
 </thead>
 <tbody>
 <tr>
-<td>Dados</td>
-<td>CSV/TSV, tipos numéricos/categóricos, qualidade, busca, tabela, valores ausentes</td>
-<td>Geometria numérica densa, até 3.000 linhas e 80 variáveis</td>
+<td>Data</td>
+<td>CSV/TSV, numeric/categorical types, quality, search, table, missing values</td>
+<td>Dense numeric geometry, up to 3,000 rows and 80 variables</td>
 </tr>
 <tr>
-<td>Pré-processamento</td>
-<td>Padrão, robusto/IQR, min–max, original; rejeição ou mediana</td>
-<td>Preserva os valores originais e registra cada transformação</td>
+<td>Preprocessing</td>
+<td>Standard, robust/IQR, min–max, original; rejection or median imputation</td>
+<td>Preserves original values and records each transformation</td>
 </tr>
 <tr>
-<td>Métricas</td>
-<td>Euclidiana, Manhattan, Chebyshev, cosseno, correlação</td>
-<td>Cosseno/correlação requerem linhas apropriadas; dissimilaridades não são todas métricas estritas</td>
+<td>Metrics</td>
+<td>Euclidean, Manhattan, Chebyshev, cosine, correlation</td>
+<td>Cosine/correlation require appropriate rows; dissimilarities are not all strict metrics</td>
 </tr>
 <tr>
-<td>Lentes</td>
-<td>PCA, MDS com até 200 marcos, difusão, excentricidade média/máxima, kNN, gaussiana, norma, índice, coluna</td>
-<td>Difusão até 600 linhas; Neighborhood proprietário não reproduzido</td>
+<td>Lenses</td>
+<td>PCA, MDS with up to 200 landmarks, diffusion, mean/maximum eccentricity, kNN, Gaussian, norm, index, column</td>
+<td>Diffusion up to 600 rows; proprietary Neighborhood lenses are not reproduced</td>
 </tr>
 <tr>
 <td>Mapper</td>
-<td>Clássico em uma/duas lentes, Ball Mapper, intervalos uniformes/equalizados</td>
-<td>Gain exato no espaço de valores ou postos; empates impedem igualar todas as contagens</td>
+<td>Classic Mapper with one/two lenses, Ball Mapper, uniform/equalized intervals</td>
+<td>Exact gain in value or rank space; ties prevent all counts from being equalized</td>
 </tr>
 <tr>
 <td>Clustering</td>
-<td>Primeiro bin vazio, DBSCAN, ligação simples/completa/média, K-means, trivial</td>
-<td>K-means euclidiano e determinístico; ruído DBSCAN vira singleton</td>
+<td>First empty bin, DBSCAN, single/complete/average linkage, K-means, trivial</td>
+<td>Euclidean, deterministic K-means; DBSCAN noise becomes singletons</td>
 </tr>
 <tr>
-<td>Conexões</td>
-<td>Interseção e Jaccard</td>
-<td>Grafo é o 1-esqueleto; o número E−V+C não representa PH da nuvem</td>
+<td>Edges</td>
+<td>Intersection and Jaccard</td>
+<td>Graph is the 1-skeleton; E−V+C does not represent point-cloud PH</td>
 </tr>
 <tr>
-<td>Exploração</td>
-<td>Pan/zoom, arrasto, seleção retangular/teclado, projeção ligada, cor e tamanho, quatro layouts</td>
-<td>Layout altera apresentação, não memberships</td>
+<td>Exploration</td>
+<td>Pan/zoom, drag, rectangular/keyboard selection, linked projection, color and size, four layouts</td>
+<td>Layout changes presentation, not memberships</td>
 </tr>
 <tr>
-<td>Populações</td>
-<td>Seleções deduplicadas, nomes, referência entre grupos, Explain e distribuições</td>
-<td>Testes exploratórios; referência remove linhas em comum</td>
+<td>Populations</td>
+<td>Deduplicated selections, names, references between groups, Explain and distributions</td>
+<td>Exploratory tests; references remove shared rows</td>
 </tr>
 <tr>
-<td>Comparação</td>
-<td>Varredura de resolução/ganho, snapshots de modelos</td>
-<td>Até 20 configurações por execução; sem garantia de estabilidade ou optimalidade</td>
+<td>Comparison</td>
+<td>Resolution/gain sweeps, model snapshots</td>
+<td>Up to 20 configurations per run; no stability or optimality guarantee</td>
 </tr>
 <tr>
 <td>PH</td>
-<td>Rips na métrica selecionada; diagrama, barcode, Betti, entropia e marcos exportáveis</td>
-<td>F₂; H0/H1 até 300 marcos; H2 até 80; duplicatas de distância zero são identificadas</td>
+<td>Rips in the selected metric; diagram, barcode, Betti, entropy and exportable landmarks</td>
+<td>F₂; H0/H1 up to 300 landmarks; H2 up to 80; zero-distance duplicates are identified</td>
 </tr>
 <tr>
-<td>Clustering topológico</td>
-<td>ToMATo, grafo k-NN, densidade e grupos</td>
-<td>τ em unidades de densidade; não equivale ao algoritmo proprietário</td>
+<td>Topological clustering</td>
+<td>ToMATo, k-NN graph, density and groups</td>
+<td>τ in density units; does not reproduce the proprietary algorithm</td>
 </tr>
 <tr>
 <td>Temporal</td>
-<td>Embedding por atrasos e PH em janelas</td>
-<td>Ordem de linhas; amostras regulares; até 25 janelas</td>
+<td>Delay embedding and sliding-window PH</td>
+<td>Row order; regularly spaced samples; up to 25 windows</td>
 </tr>
 <tr>
-<td>Imagens</td>
-<td>Cinza, altura, radial, dilatação, erosão, distância assinada; PH cubical e Euler</td>
-<td>Redução explícita a até 96×96; lower-star em vértices</td>
+<td>Images</td>
+<td>Grayscale, height, radial, dilation, erosion, signed distance; cubical PH and Euler</td>
+<td>Explicit resizing to at most 96×96; lower-star on vertices</td>
 </tr>
 <tr>
-<td>Multiparâmetro</td>
-<td>Function-Rips, Hilbert e Euler em grade</td>
-<td>Euclidiano, F₂, até 28 marcos, 10×10; algoritmo de referência denso</td>
+<td>Multiparameter</td>
+<td>Function-Rips, Hilbert and Euler on a grid</td>
+<td>Euclidean, F₂, up to 28 landmarks, 10×10; dense reference algorithm</td>
 </tr>
 <tr>
-<td>Reprodutibilidade</td>
-<td>Workspace JSON, CSV, grafo JSON/SVG, resultados JSON, script Julia com dados incorporados</td>
-<td>Dependências locais separadas; nenhum código recebido é executado pelo servidor</td>
+<td>Reproducibility</td>
+<td>Workspace JSON, CSV, graph JSON/SVG, results JSON, Julia script with embedded data</td>
+<td>Isolated dependencies; the server never executes received code</td>
 </tr>
 <tr>
-<td>Integração</td>
-<td>API Julia e REST local documentadas</td>
-<td>Sem contas, colaboração remota, Hadoop ou cluster distribuído</td>
+<td>Integration</td>
+<td>Documented Julia API and local REST</td>
+<td>No accounts, remote collaboration, Hadoop or distributed cluster</td>
 </tr>
 </tbody>
 </table>
-<h2>7. Próximas etapas concretas</h2>
+<h2>7. Concrete next steps</h2>
 <ol>
-<li>Validação de desempenho para matrizes esparsas e grandes tabelas, caching de
-   distâncias, clustering distribuído e renderização WebGL para redes grandes.</li>
-<li>Mais lentes e coberturas nativas do ecossistema, comunidades com modularidade,
-   mapas das variáveis e comparação alinhada entre modelos.</li>
-<li>Interfaces para Alpha/Witness, ciclos representativos, coordenadas circulares,
-   diagramas vetorizados, inferência por bootstrap e filtros treináveis.</li>
-<li>Projetos em disco, filas canceláveis, logs de proveniência por operação,
-   autenticação e colaboração quando houver demanda por uso remoto.</li>
-<li>Avaliações com tarefas reais, usuários e benchmarks contra implementações
-   públicas. "O mais bonito/completo" é uma direção de produto, não uma posição
-   demonstrada por esta primeira versão.</li>
+<li>Performance validation for sparse matrices and large tables, distance caching,
+   distributed clustering and WebGL rendering for large networks.</li>
+<li>More native ecosystem lenses and covers, modularity-based communities,
+   variable maps and aligned comparison between models.</li>
+<li>Interfaces for Alpha/Witness, representative cycles, circular coordinates,
+   vectorized diagrams, bootstrap inference and trainable filters.</li>
+<li>On-disk projects, cancellable queues, per-operation provenance logs,
+   authentication and collaboration when remote use is needed.</li>
+<li>Evaluation with real tasks, users and benchmarks against public
+   implementations. “The most beautiful/complete” is a product direction,
+   rather than a position demonstrated by this first release.</li>
 </ol>
-<p>As APIs científicas correspondentes já existentes em JuliaTDA continuam
-acessíveis em Julia. A cobertura da interface não deve ser confundida com a
-cobertura de toda a biblioteca.</p></main></body></html>
+<p>The corresponding scientific APIs already available in JuliaTDA remain
+accessible from Julia. Interface coverage should not be confused with the
+coverage of the entire library.</p></main></body></html>

@@ -1,5 +1,29 @@
 # Validation of MapperStudio 0.1.0
 
+## English interface and organization transfer — 5 October 2026
+
+The application now uses English for static and dynamic interface text,
+accessibility labels, demo headers/categories, CLI help, Julia errors,
+scientific notes, exports and the complete research page. Canonical links point
+to `JuliaTDA/MapperStudio.jl`.
+
+On Linux with Julia 1.12.5, all **262 package assertions** passed again.
+The browser suites passed **37 checks**: 28 workflow checks and nine gesture,
+asynchronous-import and hidden-graph checks. Rebuilding while the Mapper tab is
+hidden retains finite SVG coordinates. No invalid-coordinate console errors
+remained after that correction.
+
+Additional browser checks covered the English language declarations and views,
+the English research page, and reopening a previous-format workspace containing
+Portuguese headers, a Portuguese group name and its original color selection.
+User-supplied data, names and settings were retained. The exported Julia analysis
+script reproduced the browser model exactly for configuration, preprocessing,
+lenses, PCA projection, node memberships/aggregates and edges.
+
+Desktop, dark, mobile, Explain and persistence screenshots were refreshed in
+English. `node --check web/app.js` passed, and the HTML control IDs, values and
+structure were checked against the previous version.
+
 ## Standalone distribution — 4 October 2026
 
 Under Julia 1.12.5 on Linux x86-64, the extracted app passed **262 assertions**
@@ -18,7 +42,7 @@ unhandled scheduler exception. `node --check web/app.js` also passed.
 
 The repository's CI additionally exercises package tests and app launcher
 installation on Linux, macOS and Windows. Platform-specific results should be
-read from the [CI runs](https://github.com/vituri/MapperStudio.jl/actions/workflows/CI.yml).
+read from the [CI runs](https://github.com/JuliaTDA/MapperStudio.jl/actions/workflows/CI.yml).
 The browser evidence below belongs to the original integrated app; the
 standalone extraction changes packaging, branding, CLI and resource locations.
 

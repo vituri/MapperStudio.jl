@@ -1,7 +1,7 @@
 function checked_ids(ds, ids; allow_empty=false)
-    all(i -> i isa Integer && 1<=i<=rowcount(ds), ids) || throw(ArgumentError("Índice de linha inválido."))
+    all(i -> i isa Integer && 1<=i<=rowcount(ds), ids) || throw(ArgumentError("Invalid row index."))
     selected=sort!(unique(Int.(ids)))
-    !allow_empty && isempty(selected) && throw(ArgumentError("Selecione ao menos uma linha."))
+    !allow_empty && isempty(selected) && throw(ArgumentError("Select at least one row."))
     selected
 end
 
@@ -43,10 +43,10 @@ p-values support ties and categorical variables; BH controls the tested family
 under its usual assumptions, not selection bias from exploring this same data.
 """
 function explain(ds::Dataset, selected; reference=nothing, permutations=199, seed=2007)
-    19<=permutations<=1999 || throw(ArgumentError("Use entre 19 e 1999 permutações."))
+    19<=permutations<=1999 || throw(ArgumentError("Use between 19 and 1999 permutations."))
     a_ids=checked_ids(ds,selected)
     b_ids=isnothing(reference) ? setdiff(1:rowcount(ds),a_ids) : setdiff(checked_ids(ds,reference),a_ids)
-    length(a_ids)>=2 && length(b_ids)>=2 || throw(ArgumentError("Cada grupo precisa de pelo menos duas linhas distintas; a referência exclui a interseção."))
+    length(a_ids)>=2 && length(b_ids)>=2 || throw(ArgumentError("Each group needs at least two distinct rows; the reference excludes the intersection."))
     rng=MersenneTwister(seed); results=Dict{String,Any}[]
     for c in ds.columns
         a=filter(!isnothing,ds.data[c][a_ids]); b=filter(!isnothing,ds.data[c][b_ids])
@@ -65,7 +65,7 @@ function explain(ds::Dataset, selected; reference=nothing, permutations=199, see
             effect=pooledsd>eps(Float64) ? (mean(a)-mean(b))/pooledsd : nothing
         end
         push!(results,Dict("column"=>c,"type"=>numeric ? "numeric" : "categorical",
-            "test"=>numeric ? "KS por permutação" : "Variação total por permutação", "score"=>score,
+            "test"=>numeric ? "Permutation KS" : "Permutation total variation", "score"=>score,
             "p"=>(extreme+1)/(permutations+1),"effect"=>effect,"selected_n"=>length(a),"reference_n"=>length(b),
             "selected_mean"=>numeric ? mean(a) : nothing,"reference_mean"=>numeric ? mean(b) : nothing,
             "histogram"=>histogram_pair(a,b;numeric)))
@@ -75,5 +75,5 @@ function explain(ds::Dataset, selected; reference=nothing, permutations=199, see
     sort!(results;by=r->(r["q"],-r["score"]))
     Dict("features"=>results,"selected_n"=>length(a_ids),"reference_n"=>length(b_ids),
         "permutations"=>permutations,"seed"=>seed,"min_p"=>1/(permutations+1),
-        "note"=>"Exploratório: grupos escolhidos no mesmo conjunto criam viés de seleção. q é BH nas variáveis testadas, sem corrigir esse viés. Valide em dados independentes.")
+        "note"=>"Exploratory: groups selected from the same dataset introduce selection bias. q is BH on the tested variables, without correcting that bias. Validate with independent data.")
 end

@@ -1,19 +1,19 @@
 const CLI_HELP = """
-MapperStudio 0.1.0 — Mapper e análise topológica no navegador
+MapperStudio 0.1.0 — Mapper and topological analysis in your browser
 
-Uso: mapperstudio [--port PORTA]
+Usage: mapperstudio [--port PORT]
 
-  --port PORTA    Porta local (padrão: MAPPER_STUDIO_PORT ou 8090)
-  -h, --help     Mostrar esta ajuda
-  -v, --version  Mostrar a versão
+  --port PORT     Local port (default: MAPPER_STUDIO_PORT or 8090)
+  -h, --help     Show this help
+  -v, --version  Show the version
 
-Abra http://localhost:8090 após iniciar. Ctrl+C encerra o servidor.
+Open http://localhost:8090 after starting. Ctrl+C stops the server.
 """
 
 function cli_port(value)
     port = tryparse(Int, value)
     !isnothing(port) && 1 <= port <= 65535 ||
-        throw(ArgumentError("A porta deve ser um inteiro entre 1 e 65535."))
+        throw(ArgumentError("The port must be an integer between 1 and 65535."))
     port
 end
 
@@ -25,13 +25,13 @@ function cli_options(args; env=ENV)
         arg in ("-h", "--help") && return (; action=:help, port=nothing)
         arg in ("-v", "--version") && return (; action=:version, port=nothing)
         if arg == "--port"
-            i < length(args) || throw(ArgumentError("--port requer uma porta."))
+            i < length(args) || throw(ArgumentError("--port requires a port number."))
             i += 1
             port = args[i]
         elseif startswith(arg, "--port=")
             port = arg[8:end]
         else
-            throw(ArgumentError("Opção desconhecida: $arg. Use --help."))
+            throw(ArgumentError("Unknown option: $arg. Use --help."))
         end
         i += 1
     end

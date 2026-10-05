@@ -9,12 +9,12 @@ end
 
 function Dataset(name, columns, data)
     cols = String.(columns)
-    length(cols) <= 160 || throw(ArgumentError("Máximo de 160 colunas por tabela."))
-    allunique(cols) || throw(ArgumentError("Os nomes das colunas devem ser únicos."))
-    !isempty(cols) || throw(ArgumentError("A tabela precisa de colunas."))
+    length(cols) <= 160 || throw(ArgumentError("At most 160 columns per table."))
+    allunique(cols) || throw(ArgumentError("Column names must be unique."))
+    !isempty(cols) || throw(ArgumentError("The table must have columns."))
     n = length(data[first(cols)])
-    3 <= n <= MAX_ROWS || throw(ArgumentError("Use entre 3 e $MAX_ROWS linhas. Nenhuma linha foi amostrada silenciosamente."))
-    all(c -> length(data[c]) == n, cols) || throw(ArgumentError("Colunas com números de linhas diferentes."))
+    3 <= n <= MAX_ROWS || throw(ArgumentError("Use between 3 and $MAX_ROWS rows. No rows were silently sampled."))
+    all(c -> length(data[c]) == n, cols) || throw(ArgumentError("Columns have different numbers of rows."))
     cleaned = Dict{String,Vector{Any}}()
     numeric = String[]
     for c in cols
@@ -23,19 +23,19 @@ function Dataset(name, columns, data)
         isnum = !isempty(observed) && all(v -> v isa Real || (v isa AbstractString && !isnothing(tryparse(Float64, v))), observed)
         if isnum
             values = Any[isnothing(v) ? nothing : v isa Real ? Float64(v) : parse(Float64, v) for v in values]
-            all(v -> isnothing(v) || isfinite(v), values) || throw(ArgumentError("A coluna $c contém NaN ou infinito."))
+            all(v -> isnothing(v) || isfinite(v), values) || throw(ArgumentError("Column $c contains NaN or infinity."))
             push!(numeric, c)
         else
             values = Any[isnothing(v) ? nothing : String(string(v)) for v in values]
         end
         cleaned[c] = values
     end
-    !isempty(numeric) || throw(ArgumentError("A tabela precisa de pelo menos uma coluna numérica."))
+    !isempty(numeric) || throw(ArgumentError("The table must have at least one numeric column."))
     Dataset(string(uuid4()), String(name), cols, cleaned, numeric)
 end
 
-function parse_csv(content::AbstractString; name="Dados importados")
-    sizeof(content) <= MAX_BYTES || throw(ArgumentError("O CSV deve ter até 20 MB."))
+function parse_csv(content::AbstractString; name="Imported data")
+    sizeof(content) <= MAX_BYTES || throw(ArgumentError("The CSV must be no larger than 20 MB."))
     file = CSV.File(IOBuffer(content); normalizenames=false, limit=MAX_ROWS+1,
                     silencewarnings=true, strict=true)
     cols = String.(propertynames(file))
@@ -62,8 +62,8 @@ end
 function demo_dataset(kind="branches"; n=600, seed=2007)
     rng = MersenneTwister(seed)
     kind == "diabetes" && return parse_csv(read(joinpath(APP_ROOT, "data", "diabetes.csv"), String); name="Diabetes · Reaven & Miller")
-    kind in ("branches", "circle", "torus", "clusters") || throw(ArgumentError("Exemplo desconhecido."))
-    3 <= n <= MAX_ROWS || throw(ArgumentError("Número de pontos fora do limite."))
+    kind in ("branches", "circle", "torus", "clusters") || throw(ArgumentError("Unknown example."))
+    3 <= n <= MAX_ROWS || throw(ArgumentError("Number of points outside the allowed range."))
     x, y, z, signal = (Float64[] for _ in 1:4)
     labels = String[]
     for _ in 1:n
@@ -73,26 +73,26 @@ function demo_dataset(kind="branches"; n=600, seed=2007)
             θ = (branch-1)*2π/3 + 0.09randn(rng)
             radius = 0.12 + 2.8t
             a, b, c = radius*cos(θ), radius*sin(θ), 0.08randn(rng)
-            label = ["Exploração", "Transição", "Expansão"][branch]
+            label = ["Exploration", "Transition", "Expansion"][branch]
             s = 30 + 45t + 12(branch-1) + 4randn(rng)
         elseif kind == "circle"
             θ = 2π*t; radius = 1 + 0.035randn(rng)
             a, b, c = radius*cos(θ), radius*sin(θ), 0.025randn(rng)
-            label = θ < π ? "Arco superior" : "Arco inferior"; s = 50+40sin(θ)+randn(rng)
+            label = θ < π ? "Upper arc" : "Lower arc"; s = 50+40sin(θ)+randn(rng)
         elseif kind == "torus"
             θ, φ = 2π*t, 2π*rand(rng)
             a, b, c = (2+0.65cos(φ))*cos(θ), (2+0.65cos(φ))*sin(θ), 0.65sin(φ)
-            label = φ < π ? "Face superior" : "Face inferior"; s = 50+35sin(φ)
+            label = φ < π ? "Upper side" : "Lower side"; s = 50+35sin(φ)
         else
             branch = rand(rng, 1:3)
             a, b, c = 2.5cos(2π*branch/3)+0.3randn(rng), 2.5sin(2π*branch/3)+0.3randn(rng), 0.2randn(rng)
-            label = "Grupo $branch"; s = 20branch+5randn(rng)
+            label = "Group $branch"; s = 20branch+5randn(rng)
         end
         push!(x,a); push!(y,b); push!(z,c); push!(signal,s); push!(labels,label)
     end
-    names = Dict("branches"=>"Três caminhos", "circle"=>"Círculo com ruído", "torus"=>"Toro", "clusters"=>"Três populações")
-    cols = ["x", "y", "z", "intensidade", "população"]
-    Dataset(names[kind], cols, Dict{String,Vector{Any}}("x"=>x,"y"=>y,"z"=>z,"intensidade"=>signal,"população"=>labels))
+    names = Dict("branches"=>"Three branches", "circle"=>"Noisy circle", "torus"=>"Torus", "clusters"=>"Three populations")
+    cols = ["x", "y", "z", "intensity", "population"]
+    Dataset(names[kind], cols, Dict{String,Vector{Any}}("x"=>x,"y"=>y,"z"=>z,"intensity"=>signal,"population"=>labels))
 end
 
 const DEFAULT_CONFIG = Dict{String,Any}(
@@ -104,30 +104,30 @@ const DEFAULT_CONFIG = Dict{String,Any}(
     "ball_radius"=>0.5, "max_landmarks"=>180)
 
 function config_for(ds, supplied)
-    supplied isa AbstractDict || throw(ArgumentError("A configuração deve ser um objeto de opções."))
+    supplied isa AbstractDict || throw(ArgumentError("The configuration must be an object of options."))
     params=Dict{String,Any}(String(k)=>v for (k,v) in pairs(supplied))
     cfg = merge(copy(DEFAULT_CONFIG),params)
-    cfg["columns"] isa AbstractVector || throw(ArgumentError("Selecione uma lista de variáveis numéricas."))
-    haskey(params,"columns") && isempty(cfg["columns"]) && throw(ArgumentError("Selecione entre 1 e $MAX_COLUMNS variáveis numéricas."))
+    cfg["columns"] isa AbstractVector || throw(ArgumentError("Select a list of numeric variables."))
+    haskey(params,"columns") && isempty(cfg["columns"]) && throw(ArgumentError("Select between 1 and $MAX_COLUMNS numeric variables."))
     isempty(cfg["columns"]) && (cfg["columns"] = filter(c -> !occursin(r"(?i)(^id$|_id$)",c), ds.numeric))
     isempty(cfg["columns"]) && (cfg["columns"] = copy(ds.numeric))
     cfg["columns"] = String.(cfg["columns"])
-    allunique(cfg["columns"]) || throw(ArgumentError("Selecione cada variável uma vez."))
-    1 <= length(cfg["columns"]) <= MAX_COLUMNS || throw(ArgumentError("Selecione entre 1 e $MAX_COLUMNS variáveis numéricas."))
-    all(c -> c in ds.numeric, cfg["columns"]) || throw(ArgumentError("A geometria aceita apenas colunas numéricas existentes."))
+    allunique(cfg["columns"]) || throw(ArgumentError("Select each variable once."))
+    1 <= length(cfg["columns"]) <= MAX_COLUMNS || throw(ArgumentError("Select between 1 and $MAX_COLUMNS numeric variables."))
+    all(c -> c in ds.numeric, cfg["columns"]) || throw(ArgumentError("Geometry accepts only existing numeric columns."))
     for (key,lo,hi) in (("resolution",2,40),("bins",2,50),("min_neighbors",1,100),("k",1,12),("max_landmarks",3,300),("seed",0,typemax(Int32)))
-        cfg[key] isa Integer && lo <= cfg[key] <= hi || throw(ArgumentError("$key deve ser inteiro entre $lo e $hi."))
+        cfg[key] isa Integer && lo <= cfg[key] <= hi || throw(ArgumentError("$key must be an integer between $lo and $hi."))
     end
     for (key,lo,hi) in (("gain",1.0,5.0),("radius",1e-6,1e6),("ball_radius",1e-6,1e6),("edge_threshold",1e-6,0.999))
-        cfg[key] isa Real && isfinite(cfg[key]) && lo <= cfg[key] <= hi || throw(ArgumentError("$key deve estar entre $lo e $hi."))
+        cfg[key] isa Real && isfinite(cfg[key]) && lo <= cfg[key] <= hi || throw(ArgumentError("$key must be between $lo and $hi."))
     end
     for (key, choices) in (("scaling",("standard","robust","minmax","none")),("missing",("median","reject")),
         ("metric",("euclidean","manhattan","chebyshev","cosine","correlation")),("algorithm",("classic","ball")),
         ("cover",("uniform","quantile")),("cluster",("firstempty","dbscan","single","complete","average","kmeans","trivial")),
         ("nerve",("intersection","jaccard")))
-        cfg[key] in choices || throw(ArgumentError("Opção inválida para $key."))
+        cfg[key] in choices || throw(ArgumentError("Invalid option for $key."))
     end
-    cfg["cluster"] == "kmeans" && cfg["metric"] != "euclidean" && throw(ArgumentError("K-means requer a métrica euclidiana. Use ligação hierárquica para outras métricas."))
+    cfg["cluster"] == "kmeans" && cfg["metric"] != "euclidean" && throw(ArgumentError("K-means requires the Euclidean metric. Use hierarchical linkage for other metrics."))
     cfg
 end
 
@@ -136,7 +136,7 @@ function prepare(ds, cfg)
     audit = Any[]
     for (j,c) in enumerate(cfg["columns"])
         raw = ds.data[c]; observed = Float64.(filter(!isnothing,raw))
-        any(isnothing,raw) && cfg["missing"] == "reject" && throw(ArgumentError("$c tem valores ausentes. Escolha imputação pela mediana."))
+        any(isnothing,raw) && cfg["missing"] == "reject" && throw(ArgumentError("$c contains missing values. Choose median imputation."))
         m = median(observed)
         values = Float64[isnothing(v) ? m : v for v in raw]
         mode = cfg["scaling"]
@@ -153,13 +153,13 @@ metric_for(name) = Dict("euclidean"=>Euclidean(),"manhattan"=>Cityblock(),"cheby
 
 function distance_matrix(matrix, name)
     if name == "cosine"
-        all(col -> norm(col)>eps(Float64), eachcol(matrix)) || throw(ArgumentError("Cosseno requer linhas não nulas após o pré-processamento."))
+        all(col -> norm(col)>eps(Float64), eachcol(matrix)) || throw(ArgumentError("Cosine requires nonzero rows after preprocessing."))
     elseif name == "correlation"
-        size(matrix,1)>=2 && all(col -> std(col)>eps(Float64),eachcol(matrix)) || throw(ArgumentError("Correlação requer pelo menos duas variáveis e variação em cada linha."))
+        size(matrix,1)>=2 && all(col -> std(col)>eps(Float64),eachcol(matrix)) || throw(ArgumentError("Correlation requires at least two variables and variation in each row."))
     end
     d = pairwise(metric_for(name), matrix; dims=2)
     d = max.(0.0, (d+d')/2)
     d[diagind(d)] .= 0
-    all(isfinite,d) || throw(ArgumentError("A métrica produziu distâncias não finitas."))
+    all(isfinite,d) || throw(ArgumentError("The metric produced nonfinite distances."))
     d
 end

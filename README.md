@@ -1,9 +1,9 @@
 # MapperStudio.jl
 
-[![CI](https://github.com/vituri/MapperStudio.jl/actions/workflows/CI.yml/badge.svg)](https://github.com/vituri/MapperStudio.jl/actions/workflows/CI.yml)
+[![CI](https://github.com/JuliaTDA/MapperStudio.jl/actions/workflows/CI.yml/badge.svg)](https://github.com/JuliaTDA/MapperStudio.jl/actions/workflows/CI.yml)
 
 A local Mapper and TDA workbench with a Julia scientific backend and a browser
-interface in Portuguese. It reconstructs the main Ayasdi-style exploration
+interface in English. It reconstructs the main Ayasdi-style exploration
 workflow using this ecosystem's implementations, with explicit scientific
 limits and no dependency on an external service.
 
@@ -14,7 +14,7 @@ limits and no dependency on an external service.
 Install **Julia 1.12 or newer**. In Julia, press `]` to enter package mode:
 
 ```julia
-pkg> app add https://github.com/vituri/MapperStudio.jl
+pkg> app add https://github.com/JuliaTDA/MapperStudio.jl
 ```
 
 Then run in your terminal:
@@ -43,7 +43,7 @@ With a custom `JULIA_DEPOT_PATH`, use the `bin` directory of the first depot.
 The same installation can be performed directly from the terminal:
 
 ```bash
-julia --startup-file=no -e 'using Pkg; Pkg.Apps.add(url="https://github.com/vituri/MapperStudio.jl")'
+julia --startup-file=no -e 'using Pkg; Pkg.Apps.add(url="https://github.com/JuliaTDA/MapperStudio.jl")'
 ```
 
 No sibling checkouts or custom registry are required. Installation downloads
@@ -56,10 +56,10 @@ experimental. This installs a launcher backed by Julia, so Julia must remain
 installed. If you remove the Julia version used to install the app, reinstall
 the app with your current Julia.
 
-In Julia package mode, update or remove the app with:
+In Julia package mode, reinstall from the URL to get the latest app, or remove it:
 
 ```julia
-pkg> app update MapperStudio
+pkg> app add https://github.com/JuliaTDA/MapperStudio.jl
 pkg> app rm MapperStudio
 ```
 
@@ -69,7 +69,7 @@ the repository URL for this release.
 ## Develop from a checkout
 
 ```bash
-git clone https://github.com/vituri/MapperStudio.jl
+git clone https://github.com/JuliaTDA/MapperStudio.jl
 cd MapperStudio.jl
 julia --startup-file=no scripts/setup.jl
 julia --startup-file=no --project=. --threads=auto -m MapperStudio
@@ -85,19 +85,19 @@ Generated Manifests are local and excluded from version control.
 
 1. Start with the three-branch example, a circle, a torus, three populations,
    or the bundled real diabetes dataset.
-   Import your own CSV/TSV using **Importar CSV**.
+   Import your own CSV/TSV using **Import CSV**.
 2. Choose numeric variables, scaling, distance, one or two lenses, resolution,
-   gain, cover, clustering and an edge rule. **Construir Mapper** applies the
+   gain, cover, clustering and an edge rule. **Build Mapper** applies the
    settings. Color/layout changes update the view without recomputation.
 3. Click nodes, Shift-click to extend selection, or select an area. The linked
    PCA projection and original-data table use the same original row IDs. Drag
    nodes, pan, zoom or use keyboard Tab/Enter. Save selected rows as groups.
-4. **Explicar diferenças** compares a deduplicated population with the rest or
+4. **Explain differences** compares a deduplicated population with the rest or
    another saved group. Histograms, KS/total-variation distances, effect sizes,
    permutation p-values and BH q-values are available for export.
 5. Explore Rips H0/H1/H2, diagrams, barcodes, Betti curves and entropy in
-   **Persistência**. **Sensibilidade** compares cover parameters and saves
-   model snapshots. **Laboratório** provides ToMATo, sliding-window PH,
+   **Persistence**. **Sensitivity** compares cover parameters and saves
+   model snapshots. **Laboratory** provides ToMATo, sliding-window PH,
    function-Rips Hilbert/Euler surfaces, and cubical image PH/Euler curves.
 6. Save a workspace JSON to keep data, groups, selection, model configurations,
    positions and visual settings. Open it to reconstruct the model in Julia.

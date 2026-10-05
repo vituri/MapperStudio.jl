@@ -55,7 +55,7 @@ function mds_projection(d; seed=2007)
 end
 
 function diffusion_projection(d)
-    size(d,1)<=600 || throw(ArgumentError("A lente de difusão desta versão aceita até 600 linhas; use PCA ou MDS para tabelas maiores."))
+    size(d,1)<=600 || throw(ArgumentError("The diffusion lens supports up to 600 rows in this release; use PCA or MDS for larger tables."))
     positive=filter(>(0),vec(d)); σ=isempty(positive) ? 1.0 : median(positive)
     kernel=exp.(-(d./σ).^2); mass=vec(sum(kernel;dims=2))
     eig=eigen(Symmetric(kernel./sqrt.(mass*mass')))
@@ -68,7 +68,7 @@ end
 
 function lens_values(name, matrix, d, ds, cache, cfg)
     if startswith(name,"column:")
-        c=name[8:end]; c in ds.numeric || throw(ArgumentError("Lente: coluna numérica inexistente."))
+        c=name[8:end]; c in ds.numeric || throw(ArgumentError("Lens: numeric column not found."))
         observed=Float64.(filter(!isnothing,ds.data[c])); m=median(observed)
         return Float64[isnothing(v) ? m : v for v in ds.data[c]]
     elseif name in ("pca1","pca2")
@@ -95,7 +95,7 @@ function lens_values(name, matrix, d, ds, cache, cfg)
     elseif name=="index"
         return Float64.(1:rowcount(ds))
     end
-    throw(ArgumentError("Lente desconhecida: $name."))
+    throw(ArgumentError("Unknown lens: $name."))
 end
 
 struct SeededKMeans{M} <: TDAmapper.Refiners.AbstractRefiner
@@ -146,7 +146,7 @@ function construct_mapper(ds, cfg, matrix, d, lenses)
         while any(remaining)
             id=findfirst(remaining); cell=findall(<=(cfg["ball_radius"]),d[id,:])
             push!(cells,cell); remaining[cell].=false
-            length(cells)<=cfg["max_landmarks"] || throw(ArgumentError("O raio gerou mais de $(cfg["max_landmarks"]) bolas. Aumente o raio ou o limite de centros."))
+            length(cells)<=cfg["max_landmarks"] || throw(ArgumentError("The radius produced more than $(cfg["max_landmarks"]) balls. Increase the radius or the center limit."))
         end
         graph=TDAmapper.make_graph(points,cells,nerve)
         return TDAmapper.Mapper(X=points,C=cells,g=graph)
@@ -156,7 +156,7 @@ function construct_mapper(ds, cfg, matrix, d, lenses)
     cover=length(lenses)==1 ? TDAmapper.ImageCovers.R1Cover(coordinates[1],covers[1]) :
         TDAmapper.ImageCovers.R2Cover(collect(zip(coordinates...)),covers[1],covers[2])
     cells=TDAmapper.refine_cover(points,TDAmapper.make_cover(cover),refiner_for(cfg))
-    length(cells)<=2000 || throw(ArgumentError("O modelo gerou mais de 2.000 nós. Reduza a resolução ou aumente o limiar de clustering."))
+    length(cells)<=2000 || throw(ArgumentError("The model produced more than 2,000 nodes. Reduce the resolution or increase the clustering threshold."))
     graph=TDAmapper.make_graph(points,cells,nerve)
     TDAmapper.Mapper(X=points,C=cells,g=graph)
 end
@@ -199,9 +199,9 @@ function graph_payload(ds, M, context; elapsed=0.0)
         "summary"=>Dict("nodes"=>nv(M.g),"edges"=>ne(M.g),"components"=>length(components),
             "graph_cycles"=>ne(M.g)-nv(M.g)+length(components),"coverage"=>length(covered)/rowcount(ds),
             "rows"=>rowcount(ds),"elapsed"=>elapsed,"overlap"=>1-1/cfg["gain"]),
-        "notes"=>["Os ciclos do grafo são E−V+C; não são a homologia da nuvem nem do nervo simplicial.",
-            "Uma linha pode pertencer a vários nós; grupos e Explain deduplicam as linhas.",
-            "Equalização usa postos médios em empates; o ganho descreve a sobreposição no espaço de postos."])
+        "notes"=>["Graph cycles are E−V+C; they are not the homology of the point cloud or the simplicial nerve.",
+            "A row may belong to several nodes; groups and Explain deduplicate rows.",
+            "Equalization uses mean ranks for ties; gain describes overlap in rank space."])
 end
 
 function analyze(ds::Dataset, supplied=Dict())
@@ -211,9 +211,9 @@ function analyze(ds::Dataset, supplied=Dict())
 end
 
 function sensitivity(ds, supplied; resolutions=[6,10,14,18], gains=[1.3,1.7,2.2])
-    1<=length(resolutions)*length(gains)<=20 || throw(ArgumentError("Compare até 20 configurações."))
+    1<=length(resolutions)*length(gains)<=20 || throw(ArgumentError("Compare up to 20 configurations."))
     context=build_context(ds,supplied); results=Any[]
-    context.cfg["algorithm"]=="classic" || throw(ArgumentError("A comparação de resolução e ganho requer Mapper clássico. Ball Mapper usa raio e centros."))
+    context.cfg["algorithm"]=="classic" || throw(ArgumentError("Comparing resolution and gain requires classic Mapper. Ball Mapper uses radius and centers."))
     for resolution in resolutions, gain in gains
         cfg=config_for(ds,merge(context.cfg,Dict("resolution"=>resolution,"gain"=>gain)))
         t=time(); M=construct_mapper(ds,cfg,context.matrix,context.d,context.lenses)
@@ -221,5 +221,5 @@ function sensitivity(ds, supplied; resolutions=[6,10,14,18], gains=[1.3,1.7,2.2]
         push!(results,Dict("resolution"=>resolution,"gain"=>gain,"nodes"=>nv(M.g),"edges"=>ne(M.g),
             "components"=>c,"graph_cycles"=>ne(M.g)-nv(M.g)+c,"coverage"=>covered/rowcount(ds),"elapsed"=>time()-t))
     end
-    Dict("results"=>results,"note"=>"Análise descritiva de sensibilidade. Nenhuma configuração é declarada ótima ou estatisticamente estável.")
+    Dict("results"=>results,"note"=>"Descriptive sensitivity analysis. No configuration is declared optimal or statistically stable.")
 end
